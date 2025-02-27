@@ -45,46 +45,48 @@ let vue = new Vue({
                 console.error("No account returned from login response");
             }
         },
+        getTokenRequest(){
+            return { scopes: ['https://management.azure.com/.default'],  account: this.msalInstance.getActiveAccount() };
+        },
         fetchLog() {
+            console.warn("fetchLog 3")
             this.isLoading = true;
-            this.logUrl = this.getLogUrl(); // Dynamically build the log URL
-            const tokenRequest = {
-                scopes: ['https://management.azure.com/.default'],
-                account: this.msalInstance.getActiveAccount()
-            };
-            if (!tokenRequest.account) {
+            if (!this.getTokenRequest().account) {
                 console.error("No active account found. Make sure you're logged in.");
                 return;
             }
-            this.msalInstance.acquireTokenSilent(tokenRequest)
-                .then(tokenResponse => {
-                    return fetch(this.logUrl, { headers: { 'Authorization': `Bearer ${tokenResponse.accessToken}` } });
-                })
-                .then(response => response.text())
-                .then(data => {
-                    this.logContent = data;
-                    this.importStatus = null;
-                    this.fileNotFound = false;
-                    this.handleLogContent(this.logContent);
-                })
-                .catch(error => {
-                    if (error instanceof msal.InteractionRequiredAuthError) {
-                        this.msalInstance.acquireTokenPopup(tokenRequest)
-                            .then(tokenResponse => {
-                                return fetch(this.logUrl, { headers: { 'Authorization': `Bearer ${tokenResponse.accessToken}` } });
-                            })
-                            .then(response => response.text())
-                            .then(data => {
-                                this.logContent = data;
-                                this.importStatus = null;
-                                this.fileNotFound = false;
-                                this.handleLogContent(this.logContent);
-                            });
-                    } else {
+            this.getLogUrl().then(latestLogUrl => {  // Dynamically build the log URL
+                if (!latestLogUrl) {
+                    this.fileNotFound = true;
+                    this.logContent = null;
+                    this.isLoading = false;
+                    return;
+                }
+                this.msalInstance.acquireTokenSilent(this.getTokenRequest())
+                    .then(tokenResponse => {
+                        console.warn("Fetching log from:", latestLogUrl); // Debugging log
+                        return fetch(latestLogUrl, {
+                            headers: { 'Authorization': `Bearer ${tokenResponse.accessToken}` }
+                        });
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                        return response.text();
+                    })
+                    .then(data => {
+                        this.logContent = data;
+                        this.importStatus = null;
+                        this.fileNotFound = false;
+                        this.handleLogContent(this.logContent);
+                    })
+                    .catch(error => {
                         console.error("Error fetching log:", error);
-                    }
-                })
-                .finally(() => this.isLoading = false);
+                    })
+                    .finally(() => this.isLoading = false);
+            }).catch(error => {
+                console.error("Error getting latest log URL:", error);
+                this.isLoading = false;
+            });
         },
         logout() {
             this.msalInstance.logout();
@@ -99,18 +101,9 @@ let vue = new Vue({
 
             return `${day}.${month}. ${hours}:${minutes}:${seconds}`;
         },
-        // getLogUrl() {
-            // // if(this.logDate.day == 15) this.logDate.day = 10;
-            // return `https://typesense-dataimport.scm.azurewebsites.net/api/vfs/LogFiles/${this.logDate.year}_${this.logDate.month}_${this.logDate.day}_ln1mdlwk00005H_default_docker.log`;
-        // },
+
         getLogUrl() {
-            console.warn("getLogUrl()q")
-            const tokenRequest = {
-                scopes: ['https://management.azure.com/.default'],
-                account: this.msalInstance.getActiveAccount()
-            };
-            // Fetch the token and then fetch log files
-            return this.msalInstance.acquireTokenSilent(tokenRequest)
+            return this.msalInstance.acquireTokenSilent(this.getTokenRequest())
                 .then(tokenResponse => {
                     return fetch('https://typesense-dataimport.scm.azurewebsites.net/api/vfs/LogFiles/', {
                         headers: { 'Authorization': `Bearer ${tokenResponse.accessToken}` }
@@ -121,10 +114,7 @@ let vue = new Vue({
                     return response.json();
                 })
                 .then(files => {
-                    const logFiles = files
-                        .filter(file => file.name.endsWith('_default_docker.log'))
-                        .sort((a, b) => new Date(b.mtime) - new Date(a.mtime)); // Sort by last modified time
-
+                    const logFiles = files .filter(file => file.name.endsWith('_default_docker.log')) .sort((a, b) => new Date(b.mtime) - new Date(a.mtime)); // Sort by last modified time
                     if (logFiles.length > 0) {
                         console.warn("The latest logfile is", logFiles[0].href);
                         return logFiles[0].href; // Return the latest log file URL
@@ -145,11 +135,8 @@ let vue = new Vue({
                 .then(response => response.json())
                 .then(data => {
                     console.log("Typesense Health:", data);
-                    if (data.ok) {
-                        this.typesenseStatus = 'OK';
-                    } else {
-                        this.typesenseStatus = 'DOWN';
-                    }
+                    if (data.ok) this.typesenseStatus = 'OK';
+                    else this.typesenseStatus = 'DOWN';
                 })
                 .catch(error => {
                     console.error("Error checking Typesense health:", error);
@@ -274,7 +261,7 @@ let vue = new Vue({
                 loggerOptions: {
                     loggerCallback: (level, message, containsPii) => {
                         if (level === msal.LogLevel.Error) console.error(message);
-                        else if (level === msal.LogLevel.Info) console.info(message);
+                        // else if (level === msal.LogLevel.Info) console.info(message);
                     },
                     piiLoggingEnabled: false,
                     logLevel: msal.LogLevel.Info
