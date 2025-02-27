@@ -104,7 +104,7 @@ let vue = new Vue({
             // return `https://typesense-dataimport.scm.azurewebsites.net/api/vfs/LogFiles/${this.logDate.year}_${this.logDate.month}_${this.logDate.day}_ln1mdlwk00005H_default_docker.log`;
         // },
         getLogUrl() {
-            console.warn("getLogUrl()")
+            console.warn("getLogUrl()q")
             const tokenRequest = {
                 scopes: ['https://management.azure.com/.default'],
                 account: this.msalInstance.getActiveAccount()
