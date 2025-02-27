@@ -49,7 +49,6 @@ let vue = new Vue({
             return { scopes: ['https://management.azure.com/.default'],  account: this.msalInstance.getActiveAccount() };
         },
         fetchLog() {
-            console.warn("fetchLog 4")
             this.isLoading = true;
             if (!this.getTokenRequest().account) {
                 console.error("No active account found. Make sure you're logged in.");
@@ -64,7 +63,6 @@ let vue = new Vue({
                 }
                 this.msalInstance.acquireTokenSilent(this.getTokenRequest())
                     .then(tokenResponse => {
-                        console.warn("Fetching log from:", latestLogUrl); // Debugging log
                         return fetch(latestLogUrl, {
                             headers: { 'Authorization': `Bearer ${tokenResponse.accessToken}` }
                         });
@@ -118,7 +116,7 @@ let vue = new Vue({
                     const logFiles = files .filter(file => file.name.endsWith('_default_docker.log')) .sort((a, b) => new Date(b.mtime) - new Date(a.mtime)); // Sort by last modified time
                     const selectedLog = logFiles.find(file => file.name.includes(selectedDateStr)); // Try to find a log file that matches the selected date
                     if (selectedLog) {
-                        console.warn("Using log file:", selectedLog.href);
+                        console.log("Using log file:", selectedLog.href);
                         return selectedLog.href;
                     } else if (logFiles.length > 0) {
                         console.warn("Selected log not found, using latest:", logFiles[0].href);
