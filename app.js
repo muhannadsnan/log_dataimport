@@ -250,9 +250,8 @@ let vue = new Vue({
             auth: {
                 clientId: '0d3dfdb3-5044-45db-b46a-1c61ddd3b217',
                 authority: 'https://login.microsoftonline.com/0c14b279-e578-4708-9453-effd46ade4ae',
-                // redirectUri: 'https://logdataimport.netlify.app/'
-                redirectUri: window.location.origin // Automatically use the current domain (local or live)
-
+                redirectUri: 'https://logdataimport.netlify.app/'
+                // redirectUri: window.location.origin // Automatically use the current domain (local or live)
             },
             cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: true },
             system: {
