@@ -105,12 +105,28 @@ let vue = new Vue({
         // },
         getLogUrl() {
             console.warn("getLogUrl()")
-            return fetch('https://typesense-dataimport.scm.azurewebsites.net/api/vfs/LogFiles/')
-                .then(response => response.json())
-                .then(files => { // Filter files that end with "_default_docker.log"
-                    const logFiles = files.filter(file => file.name.endsWith('_default_docker.log')).sort((a, b) => new Date(b.mtime) - new Date(a.mtime)); // Sort by last modified time (latest first)
+            const tokenRequest = {
+                scopes: ['https://management.azure.com/.default'],
+                account: this.msalInstance.getActiveAccount()
+            };
+            // Fetch the token and then fetch log files
+            return this.msalInstance.acquireTokenSilent(tokenRequest)
+                .then(tokenResponse => {
+                    return fetch('https://typesense-dataimport.scm.azurewebsites.net/api/vfs/LogFiles/', {
+                        headers: { 'Authorization': `Bearer ${tokenResponse.accessToken}` }
+                    });
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(files => {
+                    const logFiles = files
+                        .filter(file => file.name.endsWith('_default_docker.log'))
+                        .sort((a, b) => new Date(b.mtime) - new Date(a.mtime)); // Sort by last modified time
+
                     if (logFiles.length > 0) {
-                        console.warn("the latest logfile is ", logFiles[0].href)
+                        console.warn("The latest logfile is", logFiles[0].href);
                         return logFiles[0].href; // Return the latest log file URL
                     } else {
                         console.warn("No valid log files found.");
