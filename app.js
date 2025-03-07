@@ -220,14 +220,10 @@ let vue = new Vue({
         initProgress(){
             this.progress = { organizations: -1, inactive_roles: -1, roles: -1 };
         },
-        prevDay() { // Move to the previous day
+        changeDay(day) { // Move to the previous day
+            this.progress = null;
             let currentDate = new Date(`${this.logDate.year}-${this.logDate.month}-${this.logDate.day}`);
-            currentDate.setDate(currentDate.getDate() - 1);  // Subtract one day
-            this.updateLogDate(currentDate);  // Update the date and fetch the log
-        },
-        nextDay() { // Move to the next day
-            let currentDate = new Date(`${this.logDate.year}-${this.logDate.month}-${this.logDate.day}`);
-            currentDate.setDate(currentDate.getDate() + 1);  // Add one day
+            currentDate.setDate(currentDate.getDate() + day);  // Subtract or Add one day
             this.updateLogDate(currentDate);  // Update the date and fetch the log
         },
         updateLogDate(newDate) { // Update logDate with the new date and fetch the log

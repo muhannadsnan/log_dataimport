@@ -48,7 +48,7 @@
             
             <div class="px-1 px-md-2">                
                 <div class="d-flex col mb-2 px-sm-5">
-                    <button @click="prevDay" class="change-date btn btn-dark btn-sm col-auto p-0 px-2 me-1"><i class="bi bi-caret-left-fill fs-4 px-1 d-flex"></i></button>
+                    <button @click="changeDay(-1)" class="change-date btn btn-dark btn-sm col-auto p-0 px-2 me-1"><i class="bi bi-caret-left-fill fs-4 px-1 d-flex"></i></button>
                     <div class="col px-1">
                         <input type="number" v-model="logDate.day" @change="fetchLog" class="form-control fs-5 py-1" placeholder="Day" min="1" max="31">
                     </div>
@@ -58,7 +58,7 @@
                     <div class="col px-1">
                         <input type="number" v-model="logDate.year" @change="fetchLog" class="form-control fs-5 py-1" placeholder="Year" min="2000">
                     </div>
-                    <button @click="nextDay" class="change-date btn btn-dark btn-sm col-auto p-0 px-2 ms-1"><i class="bi bi-caret-right-fill fs-4 px-1 d-flex"></i></button>
+                    <button @click="changeDay(1)" class="change-date btn btn-dark btn-sm col-auto p-0 px-2 ms-1"><i class="bi bi-caret-right-fill fs-4 px-1 d-flex"></i></button>
                 </div>
 
                 <template v-show="viewType.progress">
