@@ -118,9 +118,10 @@ let vue = new Vue({
                     if (selectedLog) {
                         console.log("Using log file:", selectedLog.href);
                         return selectedLog.href;
-                    } else if (logFiles.length > 0) {
-                        console.warn("Selected log not found, using latest:", logFiles[0].href);
-                        return logFiles[0].href; // Fallback to latest available log file
+                    } else if (logFiles.length > 0) { // Selected log not found
+                        // console.warn("Selected log not found, using latest:", logFiles[0].href);
+                        this.fileNotFound = true;
+                        return null;
                     } else {
                         console.warn("No valid log files found.");
                         return null;
