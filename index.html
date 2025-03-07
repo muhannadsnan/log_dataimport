@@ -91,7 +91,7 @@
                 
                 <div v-if="logContent" v-show="viewType.logs" class="overflow-x-scroll">
                     <div v-for="(entry, index) in formattedLogEntries" :key="index" class="d-flex align-items-center">
-                        <span v-if="entry.timestamp" class="timestamp small text-primary p-0 pe-md-2">{{ entry.timestamp }}</span>
+                        <span v-if="entry.timestamp" class="timestamp small text-primary p-0">{{ entry.timestamp }}</span>
                         <pre class="m-0 p-0 col-auto"><span>{{ entry.data }}</span></pre>
                     </div>
                 </div>
