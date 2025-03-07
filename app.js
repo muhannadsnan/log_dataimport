@@ -221,7 +221,7 @@ let vue = new Vue({
             this.progress = { organizations: -1, inactive_roles: -1, roles: -1 };
         },
         changeDay(day) { // Move to the previous day
-            this.progress = null;
+            this.initProgress();
             let currentDate = new Date(`${this.logDate.year}-${this.logDate.month}-${this.logDate.day}`);
             currentDate.setDate(currentDate.getDate() + day);  // Subtract or Add one day
             this.updateLogDate(currentDate);  // Update the date and fetch the log
