@@ -256,7 +256,7 @@ let vue = new Vue({
                 redirectUri: 'https://logdataimport.netlify.app/'
                 // redirectUri: window.location.origin // Automatically use the current domain (local or live)
             },
-            cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: true },
+            cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
             system: {
                 loggerOptions: {
                     loggerCallback: (level, message, containsPii) => {
